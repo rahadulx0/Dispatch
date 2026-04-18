@@ -30,36 +30,56 @@ function inferCategory(title, tags) {
   const tagStr = (tags || []).join(' ').toLowerCase();
   const hay = `${titleLower} ${tagStr}`;
 
-  // Strong title-driven signals first (these beat mislabeled tags)
+  // AI / ML
+  if (/\b(ai|artificial intelligence|machine learning|ml|llm|gpt|chatgpt|openai|neural|deep learning|genai)\b/.test(hay)) {
+    return 'AI';
+  }
+
+  // Security
+  if (/\b(security|cyber|cybersecurity|hacking|hacked|hacker|exploit|vulnerability|malware|phishing|ransomware|encryption)\b/.test(hay)) {
+    return 'Security';
+  }
+
+  // Startups / business-of-tech
+  if (/\b(startup|startups|entrepreneur|enterprenuer|founder|funding|seed round|vc|venture)\b/.test(hay) || /software company/.test(titleLower)) {
+    return 'Startups';
+  }
+
+  // Mobile
+  if (/\b(android|ios|iphone|ipad|flutter|react native|swift|kotlin|mobile app)\b/.test(hay)) {
+    return 'Mobile';
+  }
+
+  // Reviews
+  if (/\b(review|hands-on|unboxing|first look|verdict|comparison|vs\.?)\b/.test(titleLower)) {
+    return 'Reviews';
+  }
+
+  // Gadgets / hardware
+  if (/\b(gadget|hardware|device|iot|laptop|smartphone|wearable|drone|robot)\b/.test(hay)) {
+    return 'Gadgets';
+  }
+
+  // Tutorials — how-to / guide / IELTS / journal-style walkthroughs
   if (
+    /\b(how to|guide|tutorial|walkthrough|step-by-step|getting started|intro to|beginner|learn)\b/.test(titleLower) ||
     /journal/.test(titleLower) ||
-    /\bielts\b/.test(titleLower) ||
-    /\b(wellness|mental|gratitude|habit)\b/.test(titleLower)
+    /\bielts\b/.test(titleLower)
   ) {
-    return 'Lifestyle';
-  }
-  if (/software company/.test(titleLower) || /\b(startup|entrepreneur|enterprenuer)\b/.test(titleLower)) {
-    return 'Business';
+    return 'Tutorials';
   }
 
-  // Tech signals from title or tags — Salesforce titles often include the word "business"
-  if (
-    /\b(salesforce|apex|aura|lwc|visualforce|trailhead|flow builder|lightning|appexchange|javascript|typescript|react|node|nodejs|python|database|sql|nosql|oop|sdlc|dsa|algorithm|frontend|backend|terminal|powershell|cmd|css|html|ics protocol|iot|cyber|hacking|tutorial|output tracing|async)\b/.test(
-      hay,
-    )
-  ) {
-    return 'Technology';
+  // Programming languages / paradigms
+  if (/\b(javascript|typescript|python|java|c\+\+|go\b|golang|rust|ruby|php|swift|kotlin|async|oop|sdlc|dsa|algorithm|node|nodejs|deno|bun)\b/.test(hay)) {
+    return 'Programming';
   }
 
-  // Tag-only fallbacks
-  if (/\bielts\b/.test(tagStr) || /\b(wellness|mental|gratitude|habit)\b/.test(tagStr)) {
-    return 'Lifestyle';
-  }
-  if (/\b(startup|entrepreneur|enterprenuer)\b/.test(tagStr)) {
-    return 'Business';
+  // Software / platforms / dev tools
+  if (/\b(salesforce|apex|aura|lwc|visualforce|trailhead|flow builder|lightning|appexchange|terminal|powershell|cmd|database|sql|nosql|docker|kubernetes|git|linux|ics protocol|frontend|backend|css|html|react|vue|angular|svelte|next\.?js)\b/.test(hay)) {
+    return 'Software';
   }
 
-  return 'Technology';
+  return 'Software';
 }
 
 function normalizeTags(raw) {

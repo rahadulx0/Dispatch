@@ -85,15 +85,15 @@ export interface PaginatedAdminUsers {
 }
 
 export const CATEGORIES = [
-  'World',
-  'Business',
-  'Markets',
-  'Technology',
-  'Politics',
-  'Science',
-  'Sports',
-  'Lifestyle',
-  'Opinion',
+  'AI',
+  'Programming',
+  'Startups',
+  'Security',
+  'Software',
+  'Gadgets',
+  'Mobile',
+  'Tutorials',
+  'Reviews',
 ] as const;
 
 export type Category = (typeof CATEGORIES)[number];
