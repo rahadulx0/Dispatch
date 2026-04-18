@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install *)",
+      "Bash(node -e \"const F = require\\('fuse.js'\\); console.log\\('ok, Fuse:', typeof F\\);\")",
+      "Bash(node --check src/controllers/blogController.js)",
+      "Bash(node -e ' *)",
+      "Bash(node scripts/seedBlogs.js --dry-run)",
+      "Bash(node scripts/seedBlogs.js)"
+    ]
+  }
+}

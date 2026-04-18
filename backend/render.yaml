@@ -1,0 +1,38 @@
+services:
+  - type: web
+    name: blogs-backend
+    runtime: node
+    rootDir: backend
+    plan: free
+    buildCommand: npm ci --omit=dev
+    startCommand: npm start
+    healthCheckPath: /healthz
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_ACCESS_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: JWT_ACCESS_EXPIRES_IN
+        value: 15m
+      - key: JWT_REFRESH_EXPIRES_IN
+        value: 14d
+      - key: CORS_ORIGIN
+        sync: false
+      - key: PUBLIC_SITE_URL
+        sync: false
+      - key: MEDIA_DIR
+        value: ../media
+      - key: MAX_UPLOAD_MB
+        value: 10
+      - key: PUBLIC_MEDIA_URL
+        sync: false
+    disk:
+      name: media
+      mountPath: /var/data
+      sizeGB: 1
