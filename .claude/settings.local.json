@@ -6,7 +6,10 @@
       "Bash(node --check src/controllers/blogController.js)",
       "Bash(node -e ' *)",
       "Bash(node scripts/seedBlogs.js --dry-run)",
-      "Bash(node scripts/seedBlogs.js)"
+      "Bash(node scripts/seedBlogs.js)",
+      "WebFetch(domain:dispatch-czmb.onrender.com)",
+      "WebFetch(domain:intech-dispatch.vercel.app)",
+      "Bash(npm run *)"
     ]
   }
 }
