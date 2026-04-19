@@ -54,6 +54,7 @@ export interface FeaturedResponse {
 export interface AuthResponse {
   user: User;
   accessToken: string;
+  refreshToken?: string;
 }
 
 export interface AdminStats {

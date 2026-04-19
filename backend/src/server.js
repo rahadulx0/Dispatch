@@ -1,6 +1,4 @@
 require('dotenv').config();
-const path = require('path');
-const fs = require('fs');
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -18,11 +16,6 @@ const { notFound, errorHandler } = require('./middleware/error');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-const MEDIA_DIR = path.resolve(__dirname, '..', process.env.MEDIA_DIR || '../media');
-
-if (!fs.existsSync(MEDIA_DIR)) {
-  fs.mkdirSync(MEDIA_DIR, { recursive: true });
-}
 
 app.set('trust proxy', 1);
 
@@ -68,15 +61,6 @@ const apiLimiter = rateLimit({
 });
 app.use('/api', apiLimiter);
 
-app.use(
-  '/media',
-  express.static(MEDIA_DIR, {
-    maxAge: '30d',
-    immutable: true,
-    fallthrough: false,
-  })
-);
-
 app.get('/', (_req, res) => {
   res.json({ name: 'Blogs API', status: 'ok', time: new Date().toISOString() });
 });
@@ -95,7 +79,6 @@ app.use(errorHandler);
     await connectDB();
     app.listen(PORT, () => {
       console.log(`[server] Listening on :${PORT} (${process.env.NODE_ENV || 'development'})`);
-      console.log(`[server] Media directory: ${MEDIA_DIR}`);
     });
   } catch (err) {
     console.error('[server] Startup failed:', err.message);

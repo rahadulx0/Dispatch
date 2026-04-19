@@ -22,9 +22,11 @@ export class ApiError extends Error {
   }
 }
 
-// Access token is kept in memory; the refresh token is in an httpOnly cookie
-// managed by the browser — set by the backend at /api/auth/login & refreshed
-// at /api/auth/refresh. This avoids exposing long-lived creds to XSS.
+// Access token lives in memory. The refresh token is set as an httpOnly cookie
+// AND mirrored to localStorage so sessions survive device restart and third-
+// party cookie blocking (cross-site deploys). The refresh endpoint accepts
+// the token from either the cookie or the request body.
+const REFRESH_STORAGE_KEY = 'blogs.refreshToken';
 let accessToken: string | null = null;
 let refreshPromise: Promise<string | null> | null = null;
 type Listener = (token: string | null) => void;
@@ -42,6 +44,25 @@ export function setAccessToken(token: string | null) {
 export function subscribeAccessToken(l: Listener) {
   listeners.add(l);
   return () => listeners.delete(l);
+}
+
+function getStoredRefreshToken(): string | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    return window.localStorage.getItem(REFRESH_STORAGE_KEY);
+  } catch {
+    return null;
+  }
+}
+
+export function setStoredRefreshToken(token: string | null) {
+  if (typeof window === 'undefined') return;
+  try {
+    if (token) window.localStorage.setItem(REFRESH_STORAGE_KEY, token);
+    else window.localStorage.removeItem(REFRESH_STORAGE_KEY);
+  } catch {
+    // ignore quota / privacy-mode errors
+  }
 }
 
 type FetchOptions = RequestInit & {
@@ -95,13 +116,20 @@ async function tryRefresh(): Promise<string | null> {
   if (refreshPromise) return refreshPromise;
   refreshPromise = (async () => {
     try {
+      const stored = getStoredRefreshToken();
       const res = await fetch(`${API_URL}/api/auth/refresh`, {
         method: 'POST',
         credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(stored ? { refreshToken: stored } : {}),
       });
-      if (!res.ok) return null;
+      if (!res.ok) {
+        if (res.status === 401) setStoredRefreshToken(null);
+        return null;
+      }
       const data = (await res.json()) as AuthResponse;
       setAccessToken(data.accessToken);
+      if (data.refreshToken) setStoredRefreshToken(data.refreshToken);
       return data.accessToken;
     } catch {
       return null;
@@ -128,6 +156,7 @@ async function request<T>(path: string, options: FetchOptions = {}): Promise<T> 
         return rawFetch<T>(path, { ...options, skipRefresh: true });
       }
       setAccessToken(null);
+      setStoredRefreshToken(null);
     }
     throw err;
   }

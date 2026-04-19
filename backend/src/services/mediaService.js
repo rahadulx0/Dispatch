@@ -1,59 +1,64 @@
-const path = require('path');
-const fs = require('fs');
-const crypto = require('crypto');
+const cloudinary = require('cloudinary').v2;
 
-function localDir() {
-  return path.resolve(__dirname, '..', '..', process.env.MEDIA_DIR || '../media');
-}
-
-function ensureLocalDir() {
-  const dir = localDir();
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-  return dir;
-}
-
-function publicUrl(req, filename) {
-  const base = process.env.PUBLIC_MEDIA_URL;
-  if (base) return `${base.replace(/\/$/, '')}/${filename}`;
-  return `${req.protocol}://${req.get('host')}/media/${filename}`;
-}
-
-function extFromMime(type) {
-  switch (type) {
-    case 'image/jpeg': return '.jpg';
-    case 'image/png':  return '.png';
-    case 'image/webp': return '.webp';
-    case 'image/gif':  return '.gif';
-    case 'image/svg+xml': return '.svg';
-    default: return '.bin';
+let configured = false;
+function ensureConfigured() {
+  if (configured) return;
+  const cloud_name = process.env.CLOUDINARY_CLOUD_NAME;
+  const api_key = process.env.CLOUDINARY_API_KEY;
+  const api_secret = process.env.CLOUDINARY_API_SECRET;
+  if (!cloud_name || !api_key || !api_secret) {
+    const e = new Error(
+      'Cloudinary is not configured. Set CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET.'
+    );
+    e.status = 500;
+    throw e;
   }
+  cloudinary.config({ cloud_name, api_key, api_secret, secure: true });
+  configured = true;
 }
 
-async function uploadBuffer(buffer, { mimeType, originalName, req }) {
-  const dir = ensureLocalDir();
-  const ext = (path.extname(originalName || '').toLowerCase()) || extFromMime(mimeType);
-  const filename = `${Date.now()}-${crypto.randomBytes(12).toString('hex')}${ext}`;
-  await fs.promises.writeFile(path.join(dir, filename), buffer);
+function folder() {
+  return process.env.CLOUDINARY_FOLDER || 'blogs';
+}
+
+async function uploadBuffer(buffer, { mimeType, originalName } = {}) {
+  ensureConfigured();
+  const result = await new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      {
+        folder: folder(),
+        resource_type: 'image',
+        use_filename: Boolean(originalName),
+        unique_filename: true,
+        overwrite: false,
+      },
+      (err, res) => {
+        if (err) return reject(err);
+        resolve(res);
+      }
+    );
+    stream.end(buffer);
+  });
   return {
-    url: publicUrl(req, filename),
-    key: filename,
-    size: buffer.length,
+    url: result.secure_url,
+    key: result.public_id,
+    size: result.bytes,
     mimeType,
-    provider: 'local',
+    width: result.width,
+    height: result.height,
+    format: result.format,
+    provider: 'cloudinary',
   };
 }
 
 async function deleteAsset(key) {
   if (!key) return;
-  if (!/^[\w.\-]+$/.test(key)) return;
-  const dir = localDir();
-  const full = path.join(dir, key);
-  if (!full.startsWith(dir)) return;
+  ensureConfigured();
   try {
-    await fs.promises.unlink(full);
+    await cloudinary.uploader.destroy(key, { resource_type: 'image', invalidate: true });
   } catch (err) {
-    if (err.code !== 'ENOENT') console.warn('[media] Local delete failed:', err.message);
+    console.warn('[media] Cloudinary delete failed:', err.message);
   }
 }
 
-module.exports = { uploadBuffer, deleteAsset, localDir, ensureLocalDir };
+module.exports = { uploadBuffer, deleteAsset };

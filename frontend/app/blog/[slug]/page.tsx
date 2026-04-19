@@ -4,7 +4,6 @@ import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import ArticleShare from '@/components/ArticleShare';
 import BlogCard from '@/components/BlogCard';
-import ReadingProgress from '@/components/ReadingProgress';
 import { api, formatDate } from '@/lib/api';
 import { sanitizeHtml } from '@/lib/sanitize';
 import type { Blog } from '@/lib/types';
@@ -91,7 +90,6 @@ export default async function BlogPage({ params }: Params) {
 
   return (
     <article>
-      <ReadingProgress />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

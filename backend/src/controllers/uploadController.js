@@ -10,7 +10,6 @@ async function single(req, res, next) {
     const result = await uploadBuffer(req.file.buffer, {
       mimeType: req.file.mimetype,
       originalName: req.file.originalname,
-      req,
     });
     res.status(201).json(result);
   } catch (err) {
@@ -31,7 +30,6 @@ async function multiple(req, res, next) {
         uploadBuffer(f.buffer, {
           mimeType: f.mimetype,
           originalName: f.originalname,
-          req,
         })
       )
     );

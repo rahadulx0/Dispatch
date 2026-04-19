@@ -26,13 +26,13 @@ services:
         sync: false
       - key: PUBLIC_SITE_URL
         sync: false
-      - key: MEDIA_DIR
-        value: ../media
       - key: MAX_UPLOAD_MB
         value: 10
-      - key: PUBLIC_MEDIA_URL
+      - key: CLOUDINARY_CLOUD_NAME
         sync: false
-    disk:
-      name: media
-      mountPath: /var/data
-      sizeGB: 1
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+      - key: CLOUDINARY_FOLDER
+        value: blogs

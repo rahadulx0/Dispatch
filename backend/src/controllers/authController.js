@@ -9,7 +9,7 @@ function cookieOptions() {
     httpOnly: true,
     secure: isProd,
     sameSite: isProd ? 'none' : 'lax',
-    path: '/api/auth',
+    path: '/',
     maxAge: parseDurationMs(process.env.JWT_REFRESH_EXPIRES_IN || '14d'),
   };
   if (process.env.COOKIE_DOMAIN) opts.domain = process.env.COOKIE_DOMAIN;
@@ -29,7 +29,7 @@ function issueTokens(res, user) {
   const accessToken = signAccess(user);
   const refreshToken = signRefresh(user);
   res.cookie(REFRESH_COOKIE, refreshToken, cookieOptions());
-  return { accessToken };
+  return { accessToken, refreshToken };
 }
 
 async function register(req, res, next) {
@@ -42,8 +42,8 @@ async function register(req, res, next) {
       throw e;
     }
     const user = await User.create({ name, email, password });
-    const { accessToken } = issueTokens(res, user);
-    res.status(201).json({ user: user.toPublic(), accessToken });
+    const { accessToken, refreshToken } = issueTokens(res, user);
+    res.status(201).json({ user: user.toPublic(), accessToken, refreshToken });
   } catch (err) {
     next(err);
   }
@@ -58,8 +58,8 @@ async function login(req, res, next) {
       e.status = 401;
       throw e;
     }
-    const { accessToken } = issueTokens(res, user);
-    res.json({ user: user.toPublic(), accessToken });
+    const { accessToken, refreshToken } = issueTokens(res, user);
+    res.json({ user: user.toPublic(), accessToken, refreshToken });
   } catch (err) {
     next(err);
   }
@@ -67,7 +67,7 @@ async function login(req, res, next) {
 
 async function refresh(req, res, next) {
   try {
-    const token = req.cookies?.[REFRESH_COOKIE];
+    const token = req.cookies?.[REFRESH_COOKIE] || req.body?.refreshToken;
     if (!token) {
       const e = new Error('Refresh token missing');
       e.status = 401;
@@ -85,8 +85,8 @@ async function refresh(req, res, next) {
       e.status = 401;
       throw e;
     }
-    const { accessToken } = issueTokens(res, user);
-    res.json({ user: user.toPublic(), accessToken });
+    const { accessToken, refreshToken } = issueTokens(res, user);
+    res.json({ user: user.toPublic(), accessToken, refreshToken });
   } catch (err) {
     if (!err.status) err.status = 401;
     if (!err.message) err.message = 'Invalid refresh token';

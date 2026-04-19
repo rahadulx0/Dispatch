@@ -9,7 +9,7 @@ import {
   useState,
   type ReactNode,
 } from 'react';
-import { api, getAccessToken, setAccessToken } from '@/lib/api';
+import { api, getAccessToken, setAccessToken, setStoredRefreshToken } from '@/lib/api';
 import type { User } from '@/lib/types';
 
 interface AuthState {
@@ -40,6 +40,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     } catch {
       setAccessToken(null);
+      setStoredRefreshToken(null);
       setUser(null);
     } finally {
       setLoading(false);
@@ -51,20 +52,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [bootstrap]);
 
   const login = useCallback(async (email: string, password: string) => {
-    const { user: u, accessToken } = await api.login({ email, password });
+    const { user: u, accessToken, refreshToken } = await api.login({ email, password });
     setAccessToken(accessToken);
+    if (refreshToken) setStoredRefreshToken(refreshToken);
     setUser(u);
   }, []);
 
   const register = useCallback(async (name: string, email: string, password: string) => {
-    const { user: u, accessToken } = await api.register({ name, email, password });
+    const { user: u, accessToken, refreshToken } = await api.register({ name, email, password });
     setAccessToken(accessToken);
+    if (refreshToken) setStoredRefreshToken(refreshToken);
     setUser(u);
   }, []);
 
   const logout = useCallback(async () => {
     await api.logout();
     setAccessToken(null);
+    setStoredRefreshToken(null);
     setUser(null);
   }, []);
 
