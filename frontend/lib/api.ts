@@ -240,6 +240,11 @@ export const api = {
     form.append('image', file);
     return request('/api/upload/image', { method: 'POST', body: form, auth: true });
   },
+  deleteMedia: (key: string) =>
+    request<{ ok: boolean }>(`/api/upload/${encodeURIComponent(key)}`, {
+      method: 'DELETE',
+      auth: true,
+    }),
 
   // Admin
   adminStats: () => request<AdminStats>('/api/admin/stats', { auth: true, cache: 'no-store' }),

@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const Fuse = require('fuse.js');
 const Blog = require('../models/Blog');
+const { deleteAsset } = require('../services/mediaService');
 
 function isObjectId(v) {
   return mongoose.Types.ObjectId.isValid(v);
@@ -209,13 +210,14 @@ async function getMineById(req, res, next) {
 
 async function create(req, res, next) {
   try {
-    const { title, content, excerpt, coverImage, category, tags, status } = req.body;
+    const { title, content, excerpt, coverImage, coverImageKey, category, tags, status } = req.body;
 
     const blog = await Blog.create({
       title,
       content,
       excerpt,
       coverImage,
+      coverImageKey,
       category,
       tags: Array.isArray(tags) ? tags : [],
       status: status || 'published',
@@ -252,11 +254,15 @@ async function update(req, res, next) {
       throw e;
     }
 
-    const fields = ['title', 'content', 'excerpt', 'coverImage', 'category', 'tags', 'status'];
+    const previousKey = blog.coverImageKey;
+    const fields = ['title', 'content', 'excerpt', 'coverImage', 'coverImageKey', 'category', 'tags', 'status'];
     for (const f of fields) {
       if (f in req.body) blog[f] = req.body[f];
     }
     await blog.save();
+    if (previousKey && previousKey !== blog.coverImageKey) {
+      await deleteAsset(previousKey);
+    }
     await blog.populate('author', 'name avatar');
     res.json({ blog });
   } catch (err) {
@@ -285,7 +291,9 @@ async function remove(req, res, next) {
       e.status = 403;
       throw e;
     }
+    const keyToDelete = blog.coverImageKey;
     await blog.deleteOne();
+    if (keyToDelete) await deleteAsset(keyToDelete);
     res.json({ ok: true });
   } catch (err) {
     next(err);

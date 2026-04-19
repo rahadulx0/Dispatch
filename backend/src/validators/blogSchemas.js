@@ -22,6 +22,7 @@ const createBlogSchema = z.object({
   content: z.string().min(10, 'Content is too short'),
   excerpt: z.string().max(400).optional().default(''),
   coverImage: z.string().url().max(1000).optional().or(z.literal('')).default(''),
+  coverImageKey: z.string().max(300).optional().or(z.literal('')).default(''),
   category: z.enum(CATEGORIES).default('World'),
   tags: tagsField.default([]),
   status: z.enum(['draft', 'published']).optional().default('published'),

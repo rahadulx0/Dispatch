@@ -4,6 +4,7 @@ import { FormEvent, useRef, useState } from 'react';
 import Image from 'next/image';
 import Editor from '@/components/Editor';
 import { api } from '@/lib/api';
+import { cardCoverLoader } from '@/lib/cloudinary';
 import { CATEGORIES } from '@/lib/types';
 import type { Blog } from '@/lib/types';
 
@@ -14,6 +15,7 @@ interface Props {
     content: string;
     excerpt: string;
     coverImage: string;
+    coverImageKey: string;
     category: string;
     tags: string[];
     status: 'draft' | 'published';
@@ -26,6 +28,8 @@ export default function BlogForm({ initial, onSubmit, submitLabel = 'Publish' }:
   const [excerpt, setExcerpt] = useState(initial?.excerpt || '');
   const [content, setContent] = useState(initial?.content || '');
   const [coverImage, setCoverImage] = useState(initial?.coverImage || '');
+  const [coverImageKey, setCoverImageKey] = useState(initial?.coverImageKey || '');
+  const initialKey = useRef(initial?.coverImageKey || '');
   const [category, setCategory] = useState<string>(initial?.category || 'World');
   const [tagsText, setTagsText] = useState<string>((initial?.tags || []).join(', '));
   const [status, setStatus] = useState<'draft' | 'published'>(
@@ -40,13 +44,25 @@ export default function BlogForm({ initial, onSubmit, submitLabel = 'Publish' }:
   async function handleCover(file: File) {
     try {
       setUploading(true);
-      const { url } = await api.uploadImage(file);
+      if (coverImageKey && coverImageKey !== initialKey.current) {
+        try { await api.deleteMedia(coverImageKey); } catch {}
+      }
+      const { url, key } = await api.uploadImage(file);
       setCoverImage(url);
+      setCoverImageKey(key);
     } catch (err) {
       alert((err as Error).message || 'Upload failed');
     } finally {
       setUploading(false);
     }
+  }
+
+  async function handleRemoveCover() {
+    if (coverImageKey && coverImageKey !== initialKey.current) {
+      try { await api.deleteMedia(coverImageKey); } catch {}
+    }
+    setCoverImage('');
+    setCoverImageKey('');
   }
 
   async function handleSubmit(e: FormEvent, overrideStatus?: 'draft' | 'published') {
@@ -73,6 +89,7 @@ export default function BlogForm({ initial, onSubmit, submitLabel = 'Publish' }:
         content,
         excerpt: excerpt.trim(),
         coverImage,
+        coverImageKey,
         category,
         tags,
         status: overrideStatus || status,
@@ -188,6 +205,7 @@ export default function BlogForm({ initial, onSubmit, submitLabel = 'Publish' }:
             {coverImage ? (
               <div className="relative aspect-[16/10] w-full bg-ink-50">
                 <Image
+                  loader={cardCoverLoader}
                   src={coverImage}
                   alt="Cover"
                   fill
@@ -212,7 +230,7 @@ export default function BlogForm({ initial, onSubmit, submitLabel = 'Publish' }:
               {coverImage ? (
                 <button
                   type="button"
-                  onClick={() => setCoverImage('')}
+                  onClick={() => void handleRemoveCover()}
                   className="border border-ink-200 px-3 py-2 font-sans text-xs font-semibold uppercase tracking-[0.08em] text-ink-500 hover:border-brand-500 hover:text-brand-500"
                 >
                   Remove

@@ -26,6 +26,7 @@ export interface Blog {
   excerpt: string;
   content: string;
   coverImage?: string;
+  coverImageKey?: string;
   category: string;
   tags: string[];
   status: 'draft' | 'published';
