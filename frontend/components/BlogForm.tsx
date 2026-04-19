@@ -1,10 +1,9 @@
 'use client';
 
 import { FormEvent, useRef, useState } from 'react';
-import Image from 'next/image';
 import Editor from '@/components/Editor';
 import { api } from '@/lib/api';
-import { cardCoverLoader } from '@/lib/cloudinary';
+import CloudinaryImage from '@/components/CloudinaryImage';
 import { CATEGORIES } from '@/lib/types';
 import type { Blog } from '@/lib/types';
 
@@ -204,8 +203,8 @@ export default function BlogForm({ initial, onSubmit, submitLabel = 'Publish' }:
           <div className="mt-2 border border-ink-200">
             {coverImage ? (
               <div className="relative aspect-[16/10] w-full bg-ink-50">
-                <Image
-                  loader={cardCoverLoader}
+                <CloudinaryImage
+                  variant="card"
                   src={coverImage}
                   alt="Cover"
                   fill

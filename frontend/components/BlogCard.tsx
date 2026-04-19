@@ -1,7 +1,6 @@
 import Link from 'next/link';
-import Image from 'next/image';
 import { formatTimeAgo } from '@/lib/api';
-import { cardCoverLoader, thumbLoader } from '@/lib/cloudinary';
+import CloudinaryImage from '@/components/CloudinaryImage';
 import type { Blog } from '@/lib/types';
 
 type Variant = 'hero' | 'lead' | 'default' | 'compact' | 'list';
@@ -22,8 +21,8 @@ export default function BlogCard({ blog, variant = 'default', showImage = true }
         {showImage && blog.coverImage ? (
           <Link href={href} className="block overflow-hidden bg-ink-50">
             <div className="relative aspect-[16/10] w-full">
-              <Image
-                loader={cardCoverLoader}
+              <CloudinaryImage
+                variant="card"
                 src={blog.coverImage}
                 alt={blog.title}
                 fill
@@ -60,8 +59,8 @@ export default function BlogCard({ blog, variant = 'default', showImage = true }
         {showImage && blog.coverImage ? (
           <Link href={href} className="block overflow-hidden bg-ink-50">
             <div className="relative aspect-[16/10] w-full">
-              <Image
-                loader={cardCoverLoader}
+              <CloudinaryImage
+                variant="card"
                 src={blog.coverImage}
                 alt={blog.title}
                 fill
@@ -95,8 +94,8 @@ export default function BlogCard({ blog, variant = 'default', showImage = true }
         {showImage && blog.coverImage ? (
           <Link href={href} className="block overflow-hidden bg-ink-50">
             <div className="relative aspect-[16/10] w-full">
-              <Image
-                loader={cardCoverLoader}
+              <CloudinaryImage
+                variant="card"
                 src={blog.coverImage}
                 alt={blog.title}
                 fill
@@ -123,8 +122,8 @@ export default function BlogCard({ blog, variant = 'default', showImage = true }
         {showImage && blog.coverImage ? (
           <Link href={href} className="block h-20 w-28 flex-shrink-0 overflow-hidden bg-ink-50">
             <div className="relative h-full w-full">
-              <Image
-                loader={thumbLoader}
+              <CloudinaryImage
+                variant="thumb"
                 src={blog.coverImage}
                 alt={blog.title}
                 fill
@@ -151,8 +150,8 @@ export default function BlogCard({ blog, variant = 'default', showImage = true }
       {showImage && blog.coverImage ? (
         <Link href={href} className="block overflow-hidden bg-ink-50">
           <div className="relative aspect-[16/10] w-full">
-            <Image
-              loader={cardCoverLoader}
+            <CloudinaryImage
+              variant="card"
               src={blog.coverImage}
               alt={blog.title}
               fill

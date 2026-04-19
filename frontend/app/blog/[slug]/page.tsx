@@ -1,5 +1,4 @@
-import Image from 'next/image';
-import { articleCoverLoader, avatarLoader } from '@/lib/cloudinary';
+import CloudinaryImage from '@/components/CloudinaryImage';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
@@ -124,8 +123,8 @@ export default async function BlogPage({ params }: Params) {
           <div className="mt-8 flex flex-wrap items-center justify-between gap-x-4 gap-y-4 border-t border-ink-100 pt-5">
             <div className="flex items-center gap-3">
               {blog.author.avatar ? (
-                <Image
-                  loader={avatarLoader}
+                <CloudinaryImage
+                  variant="avatar"
                   src={blog.author.avatar}
                   alt={blog.author.name}
                   width={40}
@@ -150,8 +149,8 @@ export default async function BlogPage({ params }: Params) {
       {blog.coverImage ? (
         <div className="container-news py-8">
           <div className="relative mx-auto aspect-[16/9] w-full max-w-5xl overflow-hidden bg-ink-50">
-            <Image
-              loader={articleCoverLoader}
+            <CloudinaryImage
+              variant="article"
               src={blog.coverImage}
               alt={blog.title}
               fill
