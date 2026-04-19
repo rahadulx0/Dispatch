@@ -17,26 +17,26 @@ export default function BlogCard({ blog, variant = 'default', showImage = true }
 
   if (variant === 'hero') {
     return (
-      <article className="group grid gap-6 lg:grid-cols-2">
+      <article className="group flex flex-col">
         {showImage && blog.coverImage ? (
           <Link href={href} className="block overflow-hidden bg-ink-50">
-            <div className="relative aspect-[16/10] w-full">
+            <div className="relative aspect-[16/9] w-full">
               <CloudinaryImage
-                variant="card"
+                variant="article"
                 src={blog.coverImage}
                 alt={blog.title}
                 fill
-                sizes="(max-width: 1024px) 100vw, 50vw"
+                sizes="(max-width: 1024px) 100vw, 66vw"
                 priority
                 className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
               />
             </div>
           </Link>
         ) : null}
-        <div className="flex flex-col justify-center">
+        <div className="mt-5">
           <span className="kicker">{blog.category}</span>
           <Link href={href}>
-            <h1 className="mt-3 headline text-hero sm:text-[4rem]">{blog.title}</h1>
+            <h1 className="mt-3 headline text-hero sm:text-[3.5rem]">{blog.title}</h1>
           </Link>
           {blog.excerpt ? (
             <p className="mt-4 font-serif text-lg leading-relaxed text-ink-500">{blog.excerpt}</p>
